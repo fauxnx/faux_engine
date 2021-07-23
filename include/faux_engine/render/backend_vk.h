@@ -26,9 +26,10 @@ namespace nx {
     VkQueue graphicsQueue_;
     VkQueue presentQueue_;
     VkSwapchainKHR swapChain_;
-    std::vector<VkImage> swapChainImages_;
     VkFormat swapChainImageFormat_;
     VkExtent2D swapChainExtent_;
+    std::vector<VkImage> swapChainImages_;
+    std::vector<VkImageView> swapChainImageViews_;
 
     std::vector<const char*> extensions_;
     std::vector<const char*> deviceExtensions_;
@@ -65,6 +66,8 @@ namespace nx {
     nx::Result pickPhysicalDevice();
     nx::Result createLogicalDevice();
     nx::Result createSwapChain();
+    nx::Result createImageViews();
+    nx::Result createGraphicsPipeline();
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
       VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
