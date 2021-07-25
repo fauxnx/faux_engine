@@ -626,7 +626,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL nx::BackendVK::debugCallback(
   const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
   void* pUserData) {
 
-  switch (messageSeverity) {
+  /*switch (messageSeverity) {
   case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
     LOG(TRACE) << "validation layer: " << pCallbackData->pMessage;
     break;
@@ -639,7 +639,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL nx::BackendVK::debugCallback(
   case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
     LOG(ERROR) << "validation layer: " << pCallbackData->pMessage;
     break;
-  }
+  }*/
 
 
   return VK_FALSE;

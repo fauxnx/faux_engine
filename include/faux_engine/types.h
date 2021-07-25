@@ -15,8 +15,8 @@ typedef ::uint64_t  u64;
 namespace nx {
   
   enum class Result {
-    Error = 0,
-    Success = 1,
+    Error = -1,
+    Success = 0,
   };
   
 }

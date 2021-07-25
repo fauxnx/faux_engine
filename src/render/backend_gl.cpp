@@ -1,11 +1,11 @@
+#include <glad/glad.h>
 #include "faux_engine/render/backend_gl.h"
 #include "faux_engine/core.h"
 
-#include <glad/glad.h>
-#include <iostream>
+#include "internals.h"
+
 #include "easylogging++.h"
 
-#include "internals.h"
 
 nx::BackendGL::BackendGL() { 
 

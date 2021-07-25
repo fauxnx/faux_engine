@@ -1,7 +1,6 @@
 #include "faux_engine/core.h"
 #include "internals.h"
 #include "easylogging++.h"
-#include <memory>
 #include <stdio.h>
 
 nx::Core::Core() {}
@@ -24,6 +23,9 @@ nx::Result nx::Core::init(Settings s) {
     return nx::Result::Error;
   }
   if (renderer_.init(s.backend_) != nx::Result::Success) {
+    return nx::Result::Error;
+  }
+  if (mmanager_.init() != nx::Result::Success) {
     return nx::Result::Error;
   }
 

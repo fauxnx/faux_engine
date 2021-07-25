@@ -1,10 +1,11 @@
 #ifndef __NX_CORE_H__
 #define __NX_CORE_H__
 
+#include <memory>
 
 #include "faux_engine/render/renderer.h"
+#include "faux_engine/memory/memory_manager.h"
 #include "faux_engine/window.h"
-#include <memory>
 
 #define NXCore    nx::Core::Instance()
 
@@ -26,6 +27,7 @@ namespace nx {
     nx::Result init(Settings s);
     Renderer renderer_;
     Window window_;
+    MemoryManager mmanager_;
 
     ~Core();
   private:
