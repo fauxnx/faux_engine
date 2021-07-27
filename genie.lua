@@ -17,8 +17,12 @@ solution("faux_engine")
       "./include/",
       "$(VULKAN_SDK)/Include",
     }
-    links { "faux_engine", "vulkan-1" }
+    links { "faux_engine" }
 
+    configuration "windows"
+      links { "vulkan-1" }
+    configuration "linux"
+      links { "vulkan", "dl", "pthread" }
     configuration "Debug"
       flags {"Symbols" }
       defines { "DEBUG_"}
@@ -32,8 +36,9 @@ solution("faux_engine")
 
   project("faux_engine")
     kind "StaticLib"
-    targetextension(".lib")
-
+    --targetextension(".lib")
+    targetprefix ""
+    targetsuffix ""
     includedirs {
       "$(VULKAN_SDK)/Include",
       "./include/",
@@ -47,31 +52,21 @@ solution("faux_engine")
     }
 
     files {
-  		"./include/**.h",
+      "./include/**.h",
       "./src/**.h",
       "./src/**.cpp",
       "./deps/glfw/src/context.c",
-      "./deps/glfw/src/egl_context.c",
-      "./deps/glfw/src/egl_context.h",
       "./deps/glfw/src/init.c",
       "./deps/glfw/src/input.c",
       "./deps/glfw/src/internal.h",
       "./deps/glfw/src/mappings.h",
       "./deps/glfw/src/monitor.c",
+      "./deps/glfw/src/vulkan.c",
+      "./deps/glfw/src/window.c",
       "./deps/glfw/src/osmesa_context.c",
       "./deps/glfw/src/osmesa_context.h",
-      "./deps/glfw/src/vulkan.c",
-      "./deps/glfw/src/wgl_context.c",
-      "./deps/glfw/src/wgl_context.h",
-      "./deps/glfw/src/win32_init.c",
-      "./deps/glfw/src/win32_joystick.c",
-      "./deps/glfw/src/win32_joystick.h",
-      "./deps/glfw/src/win32_monitor.c",
-      "./deps/glfw/src/win32_platform.h",
-      "./deps/glfw/src/win32_thread.c",
-      "./deps/glfw/src/win32_time.c",
-      "./deps/glfw/src/win32_window.c",
-      "./deps/glfw/src/window.c",
+      "./deps/glfw/src/egl_context.c",
+      "./deps/glfw/src/egl_context.h",
       "./deps/glm/**",
       "./deps/glad/*",
       "./deps/easyloggingpp/*",
@@ -81,11 +76,38 @@ solution("faux_engine")
     configuration "windows"
       links { "vulkan-1", "opengl32" }
       defines { "FAUXENGINE_WIN32", "GLM_FORCE_AVX2", "_GLFW_WIN32" }
+      files {
+        "./deps/glfw/src/wgl_context.c",
+        "./deps/glfw/src/wgl_context.h",
+        "./deps/glfw/src/win32_init.c",
+        "./deps/glfw/src/win32_joystick.c",
+        "./deps/glfw/src/win32_joystick.h",
+        "./deps/glfw/src/win32_monitor.c",
+        "./deps/glfw/src/win32_platform.h",
+        "./deps/glfw/src/win32_thread.c",
+        "./deps/glfw/src/win32_time.c",
+        "./deps/glfw/src/win32_window.c",
+      }
 
     configuration "linux"
-      links { "vulkan-1", "GL", "X11", "Xcursor", "Xrandr", "Xi", "dl", "pthread" }
+      links { "vulkan", "GL", "X11", "Xcursor", "Xrandr", "Xi", "dl", "pthread" }
       defines { "FAUXENGINE_LINUX", "_GLFW_X11" }
-
+      files {
+        "./deps/glfw/src/linux_joystick.c",
+        "./deps/glfw/src/linux_joystick.h",
+        "./deps/glfw/src/x11_init.c",
+        "./deps/glfw/src/x11_monitor.c",
+        "./deps/glfw/src/x11_platform.h",
+        "./deps/glfw/src/x11_window.c",
+        "./deps/glfw/src/xkb_unicode.c",
+        "./deps/glfw/src/xkb_unicode.h",
+        "./deps/glfw/src/posix_time.c",
+        "./deps/glfw/src/posix_time.h",
+        "./deps/glfw/src/posix_thread.c",
+        "./deps/glfw/src/posix_thread.h",
+        "./deps/glfw/src/glx_context.c",
+        "./deps/glfw/src/glx_context.h",
+      }
     configuration "Debug"
       flags { "Symbols", "EnableAVX2" }
       targetdir("./bin/debug")
