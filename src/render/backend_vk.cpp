@@ -578,7 +578,7 @@ nx::Result nx::BackendVK::createSwapChain() {
   swapChainImageFormat_ = surfaceFormat.format;
   swapChainExtent_ = extent;
 
-  LOG(INFO) << "Succesfully created swapchain";
+  LOG(TRACE) << "Succesfully created swapchain";
   return nx::Result::Success;
 }
 
@@ -610,13 +610,13 @@ nx::Result nx::BackendVK::createImageViews() {
     }
   }
 
-  LOG(INFO) << "Succesfully created image views";
+  LOG(TRACE) << "Succesfully created image views";
   return nx::Result::Success;
 }
 
 nx::Result nx::BackendVK::createGraphicsPipeline() {
 
-  LOG(INFO) << "Succesfully created the graphics pipeline";
+  LOG(TRACE) << "Succesfully created the graphics pipeline";
   return nx::Result::Success;
 }
 
@@ -626,7 +626,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL nx::BackendVK::debugCallback(
   const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
   void* pUserData) {
 
-  /*switch (messageSeverity) {
+  switch (messageSeverity) {
   case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
     LOG(TRACE) << "validation layer: " << pCallbackData->pMessage;
     break;
@@ -639,7 +639,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL nx::BackendVK::debugCallback(
   case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
     LOG(ERROR) << "validation layer: " << pCallbackData->pMessage;
     break;
-  }*/
+  }
 
 
   return VK_FALSE;
