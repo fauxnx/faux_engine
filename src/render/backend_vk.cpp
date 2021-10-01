@@ -81,13 +81,11 @@ nx::Result nx::BackendVK::makeCurrent() {
   return nx::Result::Success;
 }
 
-nx::Result nx::BackendVK::createShader(u32* handle, Shader::Type type, const char* src)
-{
+nx::Result nx::BackendVK::uploadShader(Shader* s) {
   return nx::Result::Success;
 }
 
-nx::Result nx::BackendVK::clear(float r, float g, float b, float a)
-{
+nx::Result nx::BackendVK::clear(float r, float g, float b, float a) {
   return nx::Result::Success;
 }
 

@@ -14,7 +14,6 @@ namespace nx {
       Vertex,
       Fragment,
       Geometry,
-      Compute,
     };
 
     struct Source {
@@ -26,11 +25,12 @@ namespace nx {
     Shader();
     ~Shader();
 
-    nx::Result load(const char* src);
+    nx::Result load(std::vector<const char*> paths);
+    nx::Result reload();
 
-  private:
     u32 handle_;
     std::vector<Source> sources_;
+    bool compiled_;
   };
 
 }

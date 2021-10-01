@@ -19,7 +19,7 @@ namespace nx {
     virtual nx::Result shutdown() = 0;
     virtual nx::Result makeCurrent() = 0;
 
-    virtual nx::Result createShader(u32* handle, Shader::Type type, const char* src) = 0;
+    virtual nx::Result uploadShader(Shader* s) = 0;
     virtual nx::Result clear(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 1.0f) = 0;
 
     

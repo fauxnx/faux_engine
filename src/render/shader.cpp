@@ -15,42 +15,54 @@ nx::Shader::Shader() {
 
 nx::Shader::~Shader() { }
 
-nx::Result nx::Shader::load(const char* path) {
+nx::Result nx::Shader::load(std::vector<const char*> paths) {
 
-  std::string path_s = path;
+  sources_.clear();
 
-  Source s;
+  // Read and prepare all the sources
+  for (const char* path : paths) {
+    std::string path_s = path;
 
-  std::string src_code;
-  std::ifstream src_file;
+    Source s;
 
-  src_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    std::string src_code;
+    std::ifstream src_file;
 
-  try {
-    src_file.open(path);
-    std::stringstream src_stream;
-    src_stream << src_file.rdbuf();
+    src_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
-    src_file.close();
-    src_code = src_stream.str();
+    try {
+      src_file.open(path);
+      std::stringstream src_stream;
+      src_stream << src_file.rdbuf();
+
+      src_file.close();
+      src_code = src_stream.str();
+    }
+    catch (std::ifstream::failure& e) {
+      LOG(ERROR) << "Error reading shader source: " << e.what();
+      return nx::Result::Error;
+    }
+
+    s.source_ = src_code.c_str();
+
+    std::string format = path_s.substr(path_s.find_last_of(".") + 1);
+
+    if (format == "frag") {
+      s.type_ = Type::Fragment;
+    }
+    else if (format == "vert") {
+      s.type_ = Type::Vertex;
+    }
+
+    sources_.push_back(s);
   }
-  catch (std::ifstream::failure& e) {
-    LOG(ERROR) << "Error reading shader source: " << e.what();
-    return nx::Result::Error;
-  }
 
-  s.source_ = src_code.c_str();
+  return reload();
+}
 
-  std::string format = path_s.substr(path_s.find_last_of(".") + 1);
+nx::Result nx::Shader::reload() {
 
-  if (format == "frag") {
-    s.type_ = Type::Fragment;
-  }
-  else if (format == "vert") {
-    s.type_ = Type::Vertex;
-  }
-
-  sources_.push_back(s);
+  NXCore.renderer_.backend_->uploadShader(this);
 
   return nx::Result::Success;
 }

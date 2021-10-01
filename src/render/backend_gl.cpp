@@ -68,7 +68,50 @@ nx::Result nx::BackendGL::createWindow() {
   return nx::Result::Success;
 }
 
-nx::Result nx::BackendGL::createShader(u32* handle, Shader::Type type, const char* src) {
+nx::Result nx::BackendGL::uploadShader(Shader* s) {
+
+  for (Shader::Source src : s->sources_) {
+
+    switch (src.type_) {
+    case Shader::Type::Vertex: src.handle_ = glCreateShader(GL_VERTEX_SHADER); break;
+    case Shader::Type::Fragment: src.handle_ = glCreateShader(GL_FRAGMENT_SHADER); break;
+    case Shader::Type::Geometry: src.handle_ = glCreateShader(GL_GEOMETRY_SHADER); break;
+    }
+
+    glShaderSource(src.handle_, 1, &src.source_, nullptr);
+    glCompileShader(src.handle_);
+
+    GLint compiled = GL_FALSE;
+    glGetShaderiv(src.handle_, GL_COMPILE_STATUS, &compiled);
+    if (compiled != GL_TRUE) {
+      s->compiled_ = false;
+      GLint length = 0;
+      glGetShaderiv(src.handle_, GL_INFO_LOG_LENGTH, &length);
+      GLchar* log;
+      log = (GLchar*)malloc(length * sizeof(GLchar));
+      glGetShaderInfoLog(src.handle_, length, nullptr, log);
+      glDeleteShader(src.handle_);
+      LOG(ERROR) << "Failed to compile shader: " << log;
+      free(log);
+    }
+
+    glAttachShader(s->handle_, src.handle_);
+  }
+
+  glLinkProgram(s->handle_);
+
+  GLint linked = GL_FALSE;
+  glGetProgramiv(s->handle_, GL_LINK_STATUS, &linked);
+  if (linked == GL_FALSE) {
+    GLint length = 0;
+    glGetProgramiv(s->handle_, GL_INFO_LOG_LENGTH, &length);
+    GLchar* log;
+    log = (GLchar*)malloc(length * sizeof(GLchar));
+    glGetProgramInfoLog(s->handle_, length, &length, &log[0]);
+    glDeleteProgram(s->handle_);
+    LOG(ERROR) << "Failed to link shader: " << log;
+  }
+
   return nx::Result::Success;
 }
 
