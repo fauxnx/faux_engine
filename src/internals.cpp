@@ -44,10 +44,11 @@ void nx::InternalState::InternalShutdown(void* data) {
 
 void nx::InternalState::InternalMainLoop(void* data) {
 
-  while (!NXCore.window_.shouldClose()) {
-    NXCore.window_.pollEvents();
+  while (!glfwWindowShouldClose(currentWindow_)) {
+    glfwPollEvents();
 
     InternalUpdate(data);
+    glfwSwapBuffers(currentWindow_);
   }
   InternalShutdown(data);
 }

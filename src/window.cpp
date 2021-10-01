@@ -45,11 +45,3 @@ void nx::Window::resize(u32 width, u32 height) {
   width_ = width;
   height_ = height;
 }
-
-bool nx::Window::shouldClose() {
-  return glfwWindowShouldClose(NXInternal.currentWindow_);
-}
-
-void nx::Window::pollEvents() {
-  glfwPollEvents();
-}

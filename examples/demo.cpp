@@ -17,6 +17,7 @@ void Input(GameState* state) {
 }
 
 void Update(GameState* state, float delta_time) {
+  NXCore.renderer_.backend_->clear();
 
 }
 
@@ -35,7 +36,7 @@ void NX_EntryPoint() {
   s.height_ = 800;
   s.data_ = state.get();
   s.name_ = "Demo";
-  s.backend_ = nx::Backend::Type::Vulkan;
+  s.backend_ = nx::Backend::Type::OpenGL;
 
   NXCore.init(s);
 }

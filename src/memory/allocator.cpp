@@ -15,6 +15,7 @@ nx::Allocator::Allocator(const std::size_t size) {
       start_ = malloc(size_);
     }
     LOG(ERROR) << "Could not allocate the requested amount. Allocated " << size_ << " instead";
+    return;
   }
 
   LOG(TRACE) << "Created new allocator with size " << size_;
@@ -41,6 +42,7 @@ nx::Allocator::Allocator(const std::size_t size, Allocator* allocator) {
       start_ = allocator->alloc(size_, alignof(Allocator));
     }
     LOG(ERROR) << "Could not allocate the requested amount. Allocated " << size_ << " instead";
+    return;
   }
 
   LOG(TRACE) << "Created new allocator with size " << size_;

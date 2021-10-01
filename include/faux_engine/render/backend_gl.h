@@ -14,6 +14,9 @@ namespace nx {
     nx::Result shutdown() override;
     nx::Result makeCurrent() override;
 
+    nx::Result createShader(u32* handle, Shader::Type type, const char* src) override;
+    nx::Result clear(float r, float g, float b, float a) override;
+
   private:
     nx::Result createWindow();
   };

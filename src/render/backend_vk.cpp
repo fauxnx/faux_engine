@@ -46,7 +46,7 @@ nx::Result nx::BackendVK::init() {
   createImageViews();
   createGraphicsPipeline();
 
-  NXCore.renderer_.currentBackend_ = (Backend*)&NXCore.renderer_.backendVK_;
+  NXCore.renderer_.backend_ = (Backend*)&NXCore.renderer_.backendVK_;
 
   return nx::Result::Success;
 }
@@ -77,7 +77,17 @@ nx::Result nx::BackendVK::makeCurrent() {
     createWindow();
   }
   NXCore.settings_.backend_ = nx::Backend::Type::Vulkan;
-  NXCore.renderer_.currentBackend_ = (Backend*)&NXCore.renderer_.backendVK_;
+  NXCore.renderer_.backend_ = (Backend*)&NXCore.renderer_.backendVK_;
+  return nx::Result::Success;
+}
+
+nx::Result nx::BackendVK::createShader(u32* handle, Shader::Type type, const char* src)
+{
+  return nx::Result::Success;
+}
+
+nx::Result nx::BackendVK::clear(float r, float g, float b, float a)
+{
   return nx::Result::Success;
 }
 

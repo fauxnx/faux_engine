@@ -16,9 +16,6 @@ namespace nx {
 
     void resize(u32 width, u32 height);
 
-    bool shouldClose();
-    void pollEvents();
-
     Window();
     ~Window();
 

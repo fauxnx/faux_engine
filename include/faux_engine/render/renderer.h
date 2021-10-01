@@ -14,7 +14,7 @@ namespace nx {
     nx::Result init(nx::Backend::Type backend);
     nx::Result shutdown();
 
-    Backend* currentBackend_;
+    Backend* backend_;
     BackendVK backendVK_;
     BackendGL backendGL_;
   };
