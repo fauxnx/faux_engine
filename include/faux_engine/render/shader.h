@@ -3,14 +3,24 @@
 
 #include "faux_engine/types.h"
 
+#include <vector>
+
 namespace nx {
 
   class Shader {
   public:
 
-    enum Type {
+    enum class Type {
+      Vertex,
       Fragment,
-      Vertex
+      Geometry,
+      Compute,
+    };
+
+    struct Source {
+      const char* source_;
+      Type type_;
+      u32 handle_;
     };
 
     Shader();
@@ -18,7 +28,9 @@ namespace nx {
 
     nx::Result load(const char* src);
 
+  private:
     u32 handle_;
+    std::vector<Source> sources_;
   };
 
 }
