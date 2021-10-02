@@ -70,10 +70,12 @@ nx::Result nx::BackendGL::createWindow() {
 
 nx::Result nx::BackendGL::uploadShader(Shader* s) {
 
-  for (Shader::Source src : s->sources_) {
+  deleteShader(s);
+
+  for (Shader::Source& src : s->sources_) {
 
     switch (src.type_) {
-    case Shader::Type::Vertex: src.handle_ = glCreateShader(GL_VERTEX_SHADER); break;
+    case Shader::Type::Vertex:   src.handle_ = glCreateShader(GL_VERTEX_SHADER);   break;
     case Shader::Type::Fragment: src.handle_ = glCreateShader(GL_FRAGMENT_SHADER); break;
     case Shader::Type::Geometry: src.handle_ = glCreateShader(GL_GEOMETRY_SHADER); break;
     }
@@ -111,6 +113,23 @@ nx::Result nx::BackendGL::uploadShader(Shader* s) {
     glDeleteProgram(s->handle_);
     LOG(ERROR) << "Failed to link shader: " << log;
   }
+
+  return nx::Result::Success;
+}
+
+nx::Result nx::BackendGL::deleteShader(Shader* s) {
+
+  for (Shader::Source& src : s->sources_) {
+    if (src.handle_ != -1) {
+      glDeleteShader(src.handle_);
+      src.handle_ = -1;
+    }
+  }
+  if (s->handle_ != -1) {
+    glDeleteProgram(s->handle_);
+    s->handle_ = -1;
+  }
+  s->compiled_ = false;
 
   return nx::Result::Success;
 }
