@@ -141,3 +141,125 @@ nx::Result nx::BackendGL::clear(float r, float g, float b, float a = 1.0f) {
 
   return nx::Result::Success;
 }
+
+nx::Result nx::BackendGL::uploadGeometry(Geometry* g)
+{
+  if (g->gpu_version_ != g->version_) {
+
+    bool has_normals = g->shapes_[0].normals_.size() > 0;
+    bool has_texcoords = g->shapes_[0].texcoords_.size() > 0;
+    bool has_tangents = g->shapes_[0].tangents_.size() > 0;
+    bool has_bitangents = g->shapes_[0].bitangents_.size() > 0;
+
+    for (Geometry::Shape& shape : g->shapes_)
+    {
+      std::vector<float> attributes;
+      std::vector<u32> indices;
+
+      for (u32 i = 0; i < shape.vertices_.size(); ++i)
+      {
+        attributes.push_back(shape.vertices_[i].x);
+        attributes.push_back(shape.vertices_[i].y);
+        attributes.push_back(shape.vertices_[i].z);
+
+        if (has_normals) {
+          attributes.push_back(shape.normals_[i].x);
+          attributes.push_back(shape.normals_[i].y);
+          attributes.push_back(shape.normals_[i].z);
+        }
+
+        if (has_texcoords) {
+          attributes.push_back(shape.texcoords_[i].x);
+          attributes.push_back(shape.texcoords_[i].y);
+        }
+
+        if (has_tangents) {
+          attributes.push_back(shape.tangents_[i].x);
+          attributes.push_back(shape.tangents_[i].y);
+          attributes.push_back(shape.tangents_[i].z);
+        }
+
+        if (has_bitangents) {
+          attributes.push_back(shape.bitangents_[i].x);
+          attributes.push_back(shape.bitangents_[i].y);
+          attributes.push_back(shape.bitangents_[i].z);
+        }
+      }
+      for (u32 index : shape.indices_)
+      {
+        indices.push_back(index);
+      }
+      size_t attributes_size = attributes.size() * sizeof(float);
+      size_t indices_size = indices.size() * sizeof(u32);
+
+      glGenVertexArrays(1, &shape.gpu_vao_handle_);
+      glBindVertexArray(shape.gpu_vao_handle_);
+
+      glGenBuffers(1, &shape.gpu_attributes_handle_);
+      glBindBuffer(GL_ARRAY_BUFFER, shape.gpu_attributes_handle_);
+      glBufferData(GL_ARRAY_BUFFER, attributes_size, &attributes[0], GL_STREAM_DRAW);
+
+      glGenBuffers(1, &shape.gpu_indices_handle_);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, shape.gpu_indices_handle_);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_size, &indices[0], GL_STREAM_DRAW);
+
+      u32 stride = 3;
+      if (has_normals) stride += 3;
+      if (has_texcoords) stride += 2;
+      if (has_tangents) stride += 3;
+      if (has_bitangents) stride += 3;
+
+      u32 index = 0;
+      u64 offset = 0;
+      glEnableVertexAttribArray(index);
+      glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (const void*)offset);
+      index++;
+      offset += 3 * sizeof(float);
+      if (has_normals)
+      {
+        glEnableVertexAttribArray(index);
+        glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (const void*)offset);
+        index++;
+        offset += 3 * sizeof(float);
+      }
+      if (has_texcoords)
+      {
+        glEnableVertexAttribArray(index);
+        glVertexAttribPointer(index, 2, GL_FLOAT, GL_FALSE, stride * sizeof(float), (const void*)offset);
+        index++;
+        offset += 2 * sizeof(float);
+      }
+      if (has_tangents)
+      {
+        glEnableVertexAttribArray(index);
+        glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (const void*)offset);
+        index++;
+        offset += 3 * sizeof(float);
+      }
+      if (has_bitangents)
+      {
+        glEnableVertexAttribArray(index);
+        glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (const void*)offset);
+        index++;
+        offset += 3 * sizeof(float);
+      }
+    }
+
+
+
+    g->gpu_version_ = g->version_;
+  }
+  return nx::Result::Success;
+}
+
+nx::Result nx::BackendGL::drawGeometry(Geometry* g, bool use_material) {
+  for (Geometry::Shape& shape : g->shapes_) {
+    if (use_material) {
+      //nx::MaterialHandler mh;
+      //mh.materials_[shape.material_handle]->useMaterial();
+    }
+    glBindVertexArray(shape.gpu_vao_handle_);
+    glDrawElements(GL_TRIANGLES, (GLsizei)shape.indices_.size(), GL_UNSIGNED_INT, 0);
+  }
+  return nx::Result::Success;
+}

@@ -3,6 +3,7 @@
 
 #include "faux_engine/types.h"
 #include "faux_engine/render/shader.h"
+#include "faux_engine/render/geometry.h"
 
 namespace nx {
 
@@ -22,6 +23,9 @@ namespace nx {
     virtual nx::Result uploadShader(Shader* s) = 0;
     virtual nx::Result deleteShader(Shader* s) = 0;
     virtual nx::Result clear(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 1.0f) = 0;
+
+    virtual nx::Result uploadGeometry(Geometry* g) = 0;
+    virtual nx::Result drawGeometry(Geometry* g, bool use_material = true) = 0;
 
     
     bool initialized_;

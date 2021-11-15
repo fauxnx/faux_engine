@@ -85,9 +85,29 @@ nx::Result nx::BackendVK::uploadShader(Shader* s) {
   return nx::Result::Success;
 }
 
+nx::Result nx::BackendVK::deleteShader(Shader* s) {
+  return nx::Result::Success;
+}
+
 nx::Result nx::BackendVK::clear(float r, float g, float b, float a) {
   return nx::Result::Success;
 }
+
+nx::Result nx::BackendVK::uploadGeometry(Geometry* g) {
+  return nx::Result::Success;
+}
+
+
+nx::Result nx::BackendVK::drawGeometry(Geometry* g, bool use_material) {
+  for (Geometry::Shape& shape : g->shapes_) {
+    if (use_material) {
+      //nx::MaterialHandler mh;
+      //mh.materials_[shape.material_handle]->useMaterial();
+    }
+  }
+  return nx::Result::Success;
+}
+
 
 nx::Result nx::BackendVK::checkExtensions() {
 

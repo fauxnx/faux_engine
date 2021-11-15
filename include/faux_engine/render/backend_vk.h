@@ -17,7 +17,12 @@ namespace nx {
     nx::Result makeCurrent() override;
 
     nx::Result uploadShader(Shader* s) override;
+    nx::Result deleteShader(Shader* s) override;
     nx::Result clear(float r, float g, float b, float a) override;
+
+    nx::Result uploadGeometry(Geometry* g) override;
+    nx::Result drawGeometry(Geometry* g, bool use_material = true) override;
+
 
   private:
     VkInstance instance_;

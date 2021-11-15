@@ -15,6 +15,7 @@ solution("faux_engine")
     }
     includedirs {
       "./include/",
+      "./deps/",
       "$(VULKAN_SDK)/Include",
     }
     links { "faux_engine" }
@@ -49,6 +50,9 @@ solution("faux_engine")
       "./deps/KHR/",
       "./deps/glad/",
       "./deps/easyloggingpp/",
+      "./deps/stb/",
+      "./deps/tinyobj/",
+      "./deps/tinygltf/",
     }
 
     files {
@@ -70,6 +74,9 @@ solution("faux_engine")
       "./deps/glm/**",
       "./deps/glad/*",
       "./deps/easyloggingpp/*",
+      "./deps/stb/*.h",
+      "./deps/tinyobj/*",
+      "./deps/tinygltf/*",
       "./genie.lua",
     }
 
