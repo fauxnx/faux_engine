@@ -9,7 +9,9 @@ struct GameState {
 };
 
 void Startup(GameState* state) {
-
+  nx::Geometry g;
+  g.loadFromObj("../data/cube.obj");
+  g.upload();
 }
 
 void Input(GameState* state) {

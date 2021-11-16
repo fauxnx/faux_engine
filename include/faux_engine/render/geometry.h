@@ -20,15 +20,19 @@ namespace nx {
     Geometry& operator=(Geometry&& other) noexcept;
     ~Geometry();
 
-    void loadFromObj(std::string path);
-    void optimize();
-    void computeTangents();
-    void clear();
+    nx::Result loadFromObj(std::string path);
+    nx::Result optimize();
+    nx::Result computeTangents();
+    nx::Result clear();
+    nx::Result upload();
+    nx::Result draw();
 
     u32 version_ = 0;
     u32 gpu_version_ = 0;
 
     struct Shape {
+      std::string name_;
+
       std::vector<glm::vec3> vertices_;
       std::vector<glm::vec3> normals_;
       std::vector<glm::vec2> texcoords_;

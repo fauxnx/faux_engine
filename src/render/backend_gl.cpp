@@ -244,9 +244,6 @@ nx::Result nx::BackendGL::uploadGeometry(Geometry* g)
         offset += 3 * sizeof(float);
       }
     }
-
-
-
     g->gpu_version_ = g->version_;
   }
   return nx::Result::Success;

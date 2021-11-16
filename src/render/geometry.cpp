@@ -1,14 +1,13 @@
 #include "faux_engine/render/geometry.h"
 #include "faux_engine/core.h"
 
-#include "glad/glad.h"
 #include "tinyobj/tiny_obj_loader.h"
 #include <iostream>
 
 nx::Geometry::Geometry() {}
 
-nx::Geometry::Geometry(Geometry&& other) noexcept
-{
+nx::Geometry::Geometry(Geometry&& other) noexcept {
+
   version_ = other.version_;
   gpu_version_ = other.gpu_version_;
 
@@ -22,8 +21,8 @@ nx::Geometry::Geometry(Geometry&& other) noexcept
 
 }
 
-nx::Geometry& nx::Geometry::operator=(Geometry&& other) noexcept
-{
+nx::Geometry& nx::Geometry::operator=(Geometry&& other) noexcept {
+
   version_ = other.version_;
   gpu_version_ = other.gpu_version_;
 
@@ -40,101 +39,6 @@ nx::Geometry& nx::Geometry::operator=(Geometry&& other) noexcept
 }
 
 nx::Geometry::~Geometry() {}
-
-void computeTangentBasis(nx::Geometry::Shape* shape) {
-  // Adapted from https://github.com/opengl-tutorials/ogl/blob/master/common/tangentspace.cpp
-
-  for (int i = 0; i < shape->vertices_.size(); i += 3) {
-
-    // Shortcuts for vertices
-    glm::vec3& v0 = shape->vertices_[i + 0];
-    glm::vec3& v1 = shape->vertices_[i + 1];
-    glm::vec3& v2 = shape->vertices_[i + 2];
-
-    // Shortcuts for UVs
-    glm::vec2& uv0 = shape->texcoords_[i + 0];
-    glm::vec2& uv1 = shape->texcoords_[i + 1];
-    glm::vec2& uv2 = shape->texcoords_[i + 2];
-
-    // Edges of the triangle : position delta
-    glm::vec3 deltaPos1 = v1 - v0;
-    glm::vec3 deltaPos2 = v2 - v0;
-
-    // UV delta
-    glm::vec2 deltaUV1 = uv1 - uv0;
-    glm::vec2 deltaUV2 = uv2 - uv0;
-
-
-    float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-    glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
-    glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
-
-
-    // Set the same tangent for all three vertices of the triangle.
-    // They will be merged later, in vboindexer.cpp
-    shape->tangents_.push_back(tangent);
-    shape->tangents_.push_back(tangent);
-    shape->tangents_.push_back(tangent);
-
-    // Same thing for bitangents
-    shape->bitangents_.push_back(bitangent);
-    shape->bitangents_.push_back(bitangent);
-    shape->bitangents_.push_back(bitangent);
-
-  }
-  // See "Going Further"
-  for (u32 i = 0; i < shape->vertices_.size(); i += 1)
-  {
-    glm::vec3& n = shape->normals_[i];
-    glm::vec3& t = shape->tangents_[i];
-    glm::vec3& b = shape->bitangents_[i];
-
-    // Gram-Schmidt orthogonalize
-    t = glm::normalize(t - n * glm::dot(n, t));
-
-    // Calculate handedness
-    if (glm::dot(glm::cross(n, t), b) < 0.0f) {
-      t = t * -1.0f;
-    }
-
-  }
-
-}
-
-void indexVBO(nx::Geometry::Shape* shape) {
-  // Adapted from https://github.com/opengl-tutorials/ogl/blob/master/common/vboindexer.cpp
-
-  std::vector<glm::vec3> out_vertices;
-  std::vector<glm::vec3> out_normals;
-  std::vector<glm::vec2> out_texcoords;
-  std::vector<u32> out_indices;
-
-  std::unordered_map<glm::vec3, u32> vi_map;
-
-  // For each input vertex
-  for (u32 i = 0; i < shape->vertices_.size(); i++) {
-
-    // Try to find a similar vertex in out_XXXX
-    bool found = vi_map.find(shape->vertices_[i]) != vi_map.end();
-
-    if (found) { // A similar vertex is already in the VBO, use it instead !
-      u32 index = vi_map[shape->vertices_[i]];
-      out_indices.push_back(index);
-    }
-    else { // If not, it needs to be added in the output data.
-      out_vertices.push_back(shape->vertices_[i]);
-      out_texcoords.push_back(shape->texcoords_[i]);
-      out_normals.push_back(shape->normals_[i]);
-      out_indices.push_back((u32)out_vertices.size() - 1);
-      vi_map[shape->vertices_[i]] = out_indices.back();
-    }
-  }
-
-  std::swap(shape->vertices_, out_vertices);
-  std::swap(shape->normals_, out_normals);
-  std::swap(shape->texcoords_, out_texcoords);
-  std::swap(shape->indices_, out_indices);
-}
 
 struct vertex {
   glm::vec3 pos;
@@ -164,56 +68,7 @@ namespace std {
 
 }
 
-void indexVBO_TBN(nx::Geometry::Shape* shape) {
-  // Adapted from https://github.com/opengl-tutorials/ogl/blob/master/common/vboindexer.cpp
-
-  std::vector<glm::vec3> out_vertices;
-  std::vector<glm::vec3> out_normals;
-  std::vector<glm::vec2> out_texcoords;
-  std::vector<glm::vec3> out_tangents;
-  std::vector<glm::vec3> out_bitangents;
-  std::vector<u32> out_indices;
-
-  std::unordered_map<vertex, u32> vi_map;
-
-  // For each input vertex
-  for (u32 i = 0; i < shape->vertices_.size(); i++) {
-
-    vertex v;
-    v.pos = shape->vertices_[i];
-    v.normal = shape->normals_[i];
-    v.uv = shape->texcoords_[i];
-    // Try to find a similar vertex in out_XXXX
-    bool found = vi_map.find(v) != vi_map.end();
-
-    if (found) { // A similar vertex is already in the VBO, use it instead !
-      u32 index = vi_map[v];
-      out_indices.push_back(index);
-
-      // Average the tangents and the bitangents
-      out_tangents[index] += shape->tangents_[i];
-      out_bitangents[index] += shape->bitangents_[i];
-    }
-    else { // If not, it needs to be added in the output data.
-      out_vertices.push_back(shape->vertices_[i]);
-      out_texcoords.push_back(shape->texcoords_[i]);
-      out_normals.push_back(shape->normals_[i]);
-      out_tangents.push_back(shape->tangents_[i]);
-      out_bitangents.push_back(shape->bitangents_[i]);
-      out_indices.push_back((u32)out_vertices.size() - 1);
-      vi_map[v] = out_indices.back();
-    }
-  }
-
-  std::swap(shape->vertices_, out_vertices);
-  std::swap(shape->normals_, out_normals);
-  std::swap(shape->texcoords_, out_texcoords);
-  std::swap(shape->tangents_, out_tangents);
-  std::swap(shape->bitangents_, out_bitangents);
-  std::swap(shape->indices_, out_indices);
-}
-void nx::Geometry::loadFromObj(std::string path)
-{
+nx::Result nx::Geometry::loadFromObj(std::string path) {
   tinyobj::ObjReaderConfig reader_config;
   reader_config.mtl_search_path = ""; // Path to material files
 
@@ -234,9 +89,10 @@ void nx::Geometry::loadFromObj(std::string path)
   auto& shapes = reader.GetShapes();
   auto& materials = reader.GetMaterials();
 
-  for (auto& shape : shapes)
-  {
+  for (auto& shape : shapes) {
+
     Shape s;
+    s.name_ = shape.name;
     u32 index_offset = 0;
     u32 shape_material = -1;
 
@@ -274,37 +130,143 @@ void nx::Geometry::loadFromObj(std::string path)
     //addMaterialSlotTexture(materials[shape_material].name);
 
     //setShapeMaterialSlot(materials[shape_material].name);
+
+    shapes_.push_back(s);
   }
+
+  return nx::Result::Success;
 }
 
-void nx::Geometry::optimize() // TODO: break this down better
-{
-  for (Shape& shape : shapes_)
-  {
-    if (shape.tangents_.size() > 0)
-    {
-      indexVBO_TBN(&shape);
+nx::Result nx::Geometry::optimize() {// TODO: break this down better and check that vectors are not empty
+
+  for (Shape& shape : shapes_) {
+    // Adapted from https://github.com/opengl-tutorials/ogl/blob/master/common/vboindexer.cpp
+
+    std::vector<glm::vec3> out_vertices;
+    std::vector<glm::vec3> out_normals;
+    std::vector<glm::vec2> out_texcoords;
+    std::vector<glm::vec3> out_tangents;
+    std::vector<glm::vec3> out_bitangents;
+    std::vector<u32> out_indices;
+
+    std::unordered_map<vertex, u32> vi_map;
+
+    bool has_normals = shape.normals_.size() > 0;
+    bool has_texcoords = shape.texcoords_.size() > 0;
+    bool has_tangents = shape.tangents_.size() > 0;
+    bool has_bitangents = shape.bitangents_.size() > 0;
+
+    // For each input vertex
+    for (u32 i = 0; i < shape.vertices_.size(); i++) {
+
+      vertex v;
+      v.pos = shape.vertices_[i];
+      if (has_normals) { v.normal = shape.normals_[i]; }
+      if (has_texcoords) { v.uv = shape.texcoords_[i]; }
+      
+      // Try to find a similar vertex in out_XXXX
+      bool found = vi_map.find(v) != vi_map.end();
+
+      if (found) { // A similar vertex is already in the VBO, use it instead !
+        u32 index = vi_map[v];
+        out_indices.push_back(index);
+
+        // Average the tangents and the bitangents
+        if (has_tangents) { out_tangents[index] += shape.tangents_[i]; }
+        if (has_bitangents) { out_bitangents[index] += shape.bitangents_[i]; }
+      }
+      else { // If not, it needs to be added in the output data.
+        out_vertices.push_back(shape.vertices_[i]);
+        if (has_normals) { out_normals.push_back(shape.normals_[i]); }
+        if (has_normals) { out_texcoords.push_back(shape.texcoords_[i]); }
+        if (has_normals) { out_tangents.push_back(shape.tangents_[i]); }
+        if (has_normals) { out_bitangents.push_back(shape.bitangents_[i]); }
+        out_indices.push_back((u32)out_vertices.size() - 1);
+        vi_map[v] = out_indices.back();
+      }
     }
-    else {
-      indexVBO(&shape);
+
+    std::swap(shape.vertices_, out_vertices);
+    std::swap(shape.normals_, out_normals);
+    std::swap(shape.texcoords_, out_texcoords);
+    std::swap(shape.tangents_, out_tangents);
+    std::swap(shape.bitangents_, out_bitangents);
+    std::swap(shape.indices_, out_indices);
+  }
+  version_++;
+
+  return nx::Result::Success;
+}
+
+nx::Result nx::Geometry::computeTangents() {
+
+  for (Shape& shape : shapes_) {
+    // Adapted from https://github.com/opengl-tutorials/ogl/blob/master/common/tangentspace.cpp
+
+    for (size_t i = 0; i < shape.vertices_.size(); i += 3) {
+
+      // Shortcuts for vertices
+      glm::vec3& v0 = shape.vertices_[i + 0];
+      glm::vec3& v1 = shape.vertices_[i + 1];
+      glm::vec3& v2 = shape.vertices_[i + 2];
+
+      // Shortcuts for UVs
+      glm::vec2& uv0 = shape.texcoords_[i + 0];
+      glm::vec2& uv1 = shape.texcoords_[i + 1];
+      glm::vec2& uv2 = shape.texcoords_[i + 2];
+
+      // Edges of the triangle : position delta
+      glm::vec3 deltaPos1 = v1 - v0;
+      glm::vec3 deltaPos2 = v2 - v0;
+
+      // UV delta
+      glm::vec2 deltaUV1 = uv1 - uv0;
+      glm::vec2 deltaUV2 = uv2 - uv0;
+
+
+      float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+      glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+      glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+
+
+      // Set the same tangent for all three vertices of the triangle.
+      // They will be merged later, in vboindexer.cpp
+      shape.tangents_.push_back(tangent);
+      shape.tangents_.push_back(tangent);
+      shape.tangents_.push_back(tangent);
+
+      // Same thing for bitangents
+      shape.bitangents_.push_back(bitangent);
+      shape.bitangents_.push_back(bitangent);
+      shape.bitangents_.push_back(bitangent);
+
+    }
+    // See "Going Further"
+    for (u32 i = 0; i < shape.vertices_.size(); i += 1) {
+
+      glm::vec3& n = shape.normals_[i];
+      glm::vec3& t = shape.tangents_[i];
+      glm::vec3& b = shape.bitangents_[i];
+
+      // Gram-Schmidt orthogonalize
+      t = glm::normalize(t - n * glm::dot(n, t));
+
+      // Calculate handedness
+      if (glm::dot(glm::cross(n, t), b) < 0.0f) {
+        t = t * -1.0f;
+      }
+
     }
   }
   version_++;
+
+  return nx::Result::Success;
 }
 
-void nx::Geometry::computeTangents()
-{
-  for (Shape& shape : shapes_)
-  {
-    computeTangentBasis(&shape);
-  }
-  version_++;
-}
+nx::Result nx::Geometry::clear() {
 
-void nx::Geometry::clear()
-{
-  for (Shape& shape : shapes_)
-  {
+  for (Shape& shape : shapes_) {
+
     shape.vertices_.clear();
     shape.normals_.clear();
     shape.texcoords_.clear();
@@ -314,4 +276,16 @@ void nx::Geometry::clear()
   }
   
   version_++;
+
+  return nx::Result::Success;
+}
+
+nx::Result nx::Geometry::upload() {
+
+  return NXCore.renderer_.backend_->uploadGeometry(this);
+}
+
+nx::Result nx::Geometry::draw() {
+
+  return NXCore.renderer_.backend_->drawGeometry(this);
 }
