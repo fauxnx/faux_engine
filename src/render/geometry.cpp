@@ -137,7 +137,7 @@ nx::Result nx::Geometry::loadFromObj(std::string path) {
   return nx::Result::Success;
 }
 
-nx::Result nx::Geometry::optimize() {// TODO: break this down better and check that vectors are not empty
+nx::Result nx::Geometry::optimize() {
 
   for (Shape& shape : shapes_) {
     // Adapted from https://github.com/opengl-tutorials/ogl/blob/master/common/vboindexer.cpp
@@ -177,10 +177,10 @@ nx::Result nx::Geometry::optimize() {// TODO: break this down better and check t
       }
       else { // If not, it needs to be added in the output data.
         out_vertices.push_back(shape.vertices_[i]);
-        if (has_normals) { out_normals.push_back(shape.normals_[i]); }
-        if (has_normals) { out_texcoords.push_back(shape.texcoords_[i]); }
-        if (has_normals) { out_tangents.push_back(shape.tangents_[i]); }
-        if (has_normals) { out_bitangents.push_back(shape.bitangents_[i]); }
+        if (has_normals)    { out_normals.push_back(shape.normals_[i]); }
+        if (has_texcoords)  { out_texcoords.push_back(shape.texcoords_[i]); }
+        if (has_tangents)   { out_tangents.push_back(shape.tangents_[i]); }
+        if (has_bitangents) { out_bitangents.push_back(shape.bitangents_[i]); }
         out_indices.push_back((u32)out_vertices.size() - 1);
         vi_map[v] = out_indices.back();
       }
